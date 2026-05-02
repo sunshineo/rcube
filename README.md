@@ -16,6 +16,9 @@ Open the local Vite URL shown in the terminal.
 - `R L U D F B`: face turns
 - `M E S`: slice turns
 - `X Y Z`: whole cube turns
+- `A`: run `F' U F U'`
+- `;`: run `R U' R' U`
+- `T`: run `U' R U L' U' R' U L`
 - `Shift + move`: inverse turn
 - `2` then a move: half turn
 - Arrow keys: orbit the view

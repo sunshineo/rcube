@@ -29,6 +29,9 @@ This project is a Vite + TypeScript + Three.js web app that renders a polished, 
   - `E`: equator slice between `U` and `D`, direction follows `D`.
   - `S`: standing slice between `F` and `B`, direction follows `F`.
 - `X Y Z`: whole-cube rotations.
+- `A`: runs `F' U F U'`.
+- `;`: runs `R U' R' U`.
+- `T`: runs `U' R U L' U' R' U L`.
 - `Shift + move`: inverse turn.
 - `2` then a move: half turn.
 - Arrow keys: orbit view.

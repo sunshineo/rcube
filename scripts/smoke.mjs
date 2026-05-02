@@ -94,6 +94,37 @@ try {
   await waitForIdle(page)
   await assertSnapshot(page, (snapshot) => snapshot.isSolved, 'notation sequence plus inverse should solve')
 
+  await page.keyboard.press('Digit0')
+  await waitForIdle(page)
+  await page.keyboard.press('KeyA')
+  await waitForIdle(page)
+  await assertSnapshot(
+    page,
+    (snapshot) => !snapshot.isSolved && snapshot.moveCount === 4 && snapshot.lastMoves.join(' ') === "F' U F U'",
+    'A should run F prime U F U prime',
+  )
+
+  await page.keyboard.press('Digit0')
+  await waitForIdle(page)
+  await page.keyboard.press('Semicolon')
+  await waitForIdle(page)
+  await assertSnapshot(
+    page,
+    (snapshot) => !snapshot.isSolved && snapshot.moveCount === 4 && snapshot.lastMoves.join(' ') === "R U' R' U",
+    'semicolon should run R U prime R prime U',
+  )
+
+  await page.keyboard.press('Digit0')
+  await waitForIdle(page)
+  await page.keyboard.press('KeyT')
+  await waitForIdle(page)
+  await assertSnapshot(
+    page,
+    (snapshot) =>
+      !snapshot.isSolved && snapshot.moveCount === 8 && snapshot.lastMoves.join(' ') === "U' R U L' U' R' U L",
+    'T should run U prime R U L prime U prime R prime U L',
+  )
+
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.press('ArrowUp')
   await page.keyboard.press('Equal')

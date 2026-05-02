@@ -42,6 +42,12 @@ const MOVE_CODE_MAP: Record<string, string> = {
   KeyZ: 'Z',
 }
 
+const ALGORITHM_CODE_MAP: Record<string, string> = {
+  KeyA: "F' U F U'",
+  KeyT: "U' R U L' U' R' U L",
+  Semicolon: "R U' R' U",
+}
+
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <main class="app-shell">
     <canvas id="scene" aria-label="Interactive 3D Rubik's cube"></canvas>
@@ -89,6 +95,9 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           <span>R L U D F B</span><span>Face turns</span>
           <span>M E S</span><span>Slice turns</span>
           <span>X Y Z</span><span>Whole cube turns</span>
+          <span>A</span><span>F' U F U'</span>
+          <span>;</span><span>R U' R' U</span>
+          <span>T</span><span>U' R U L' U' R' U L</span>
           <span>Shift + move</span><span>Inverse turn</span>
           <span>2 then move</span><span>Half turn</span>
           <span>Arrow keys</span><span>Orbit view</span>
@@ -313,6 +322,15 @@ function handleKeyDown(event: KeyboardEvent): void {
   }
 
   if (event.repeat) {
+    return
+  }
+
+  const algorithm = ALGORITHM_CODE_MAP[event.code]
+
+  if (algorithm && !event.shiftKey && !event.metaKey && !event.altKey && !event.ctrlKey) {
+    event.preventDefault()
+    doubleTurnArmed = false
+    cube.enqueueNotation(algorithm)
     return
   }
 
