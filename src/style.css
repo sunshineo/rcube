@@ -1,0 +1,341 @@
+:root {
+  color: #f2eee5;
+  background: #12110f;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  min-width: 320px;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background:
+    linear-gradient(155deg, rgba(47, 41, 32, 0.98), rgba(17, 17, 16, 0.98) 46%, rgba(17, 23, 22, 0.98)),
+    #12110f;
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+}
+
+#scene {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100vw;
+  height: 100svh;
+  cursor: grab;
+  touch-action: none;
+}
+
+#scene:active {
+  cursor: grabbing;
+}
+
+.top-bar {
+  position: fixed;
+  top: 18px;
+  left: 20px;
+  right: 20px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  pointer-events: none;
+}
+
+.brand,
+.status-bar,
+.tool-dock,
+.move-panel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 17, 15, 0.58);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px) saturate(1.15);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  height: 42px;
+  padding: 0 14px 0 10px;
+  border-radius: 8px;
+  color: #f7f1e7;
+  letter-spacing: 0;
+}
+
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: conic-gradient(from 45deg, #d9342b, #f2c438, #1fa05c, #2459c7, #f28a21, #d9342b);
+  color: #14110e;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.brand-name {
+  font-size: 15px;
+  font-weight: 720;
+}
+
+.status-bar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: rgba(247, 241, 231, 0.78);
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+.state-pill {
+  display: inline-flex;
+  align-items: center;
+  min-width: 70px;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: rgba(242, 196, 56, 0.15);
+  color: #ffe28a;
+  font-weight: 680;
+}
+
+.state-pill[data-state="solved"] {
+  background: rgba(31, 160, 92, 0.17);
+  color: #8ef0b6;
+}
+
+.tool-dock {
+  position: fixed;
+  z-index: 6;
+  top: 78px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #f4eee3;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.icon-button:hover {
+  border-color: rgba(242, 196, 56, 0.48);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.icon-button:active {
+  transform: translateY(1px);
+}
+
+.icon-button:focus-visible {
+  outline: 2px solid #f2c438;
+  outline-offset: 3px;
+}
+
+.icon-button svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.1;
+}
+
+.icon-button.compact {
+  width: 34px;
+  height: 34px;
+}
+
+.move-panel {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  z-index: 5;
+  display: grid;
+  width: min(640px, calc(100vw - 40px));
+  min-height: 58px;
+  transform: translateX(-50%);
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 14px;
+  border-radius: 8px;
+}
+
+.move-panel-label {
+  color: rgba(247, 241, 231, 0.54);
+  font-size: 12px;
+  font-weight: 680;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.move-strip {
+  min-width: 0;
+  overflow: hidden;
+  color: #f7f1e7;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
+  font-size: 16px;
+  line-height: 1.35;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.move-strip[data-mode="armed"] {
+  color: #ffe28a;
+}
+
+.help-dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(26, 24, 21, 0.96);
+  color: #f7f1e7;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
+  backdrop-filter: blur(22px);
+}
+
+.help-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.54);
+}
+
+.help-dialog form {
+  margin: 0;
+  padding: 18px;
+}
+
+.dialog-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.dialog-title-row h1 {
+  margin: 0;
+  color: #f7f1e7;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.key-grid {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.78fr) 1fr;
+  gap: 8px 14px;
+  align-items: center;
+  color: rgba(247, 241, 231, 0.72);
+  font-size: 14px;
+}
+
+.key-grid span:nth-child(odd) {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #f7f1e7;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+@media (max-width: 680px) {
+  .top-bar {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+
+  .brand {
+    height: 38px;
+    padding-right: 10px;
+  }
+
+  .brand-name {
+    display: none;
+  }
+
+  .status-bar {
+    height: 38px;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .state-pill {
+    min-width: 64px;
+    padding-inline: 8px;
+  }
+
+  .tool-dock {
+    top: 64px;
+    right: 12px;
+  }
+
+  .move-panel {
+    bottom: 12px;
+    width: calc(100vw - 24px);
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .move-panel-label,
+  .move-strip {
+    text-align: left;
+  }
+
+  .move-strip {
+    font-size: 14px;
+  }
+}
