@@ -16,11 +16,15 @@ Open the local Vite URL shown in the terminal.
 - `R L U D F B`: face turns
 - `M E S`: slice turns
 - `X Y Z`: whole cube turns
-- `A`: run `F' U F U'`
-- `;`: run `R U' R' U`
-- `T`: run `U' R U L' U' R' U L`
+- `1`: flip colors of an edge piece in place
+- `2`: right hand 4 moves combo
+- `3`: left hand 4 moves combo
+- `4`: move an edge piece to the right
+- `5`: move an edge piece to the left
+- `6`: create cross
+- `7`: fix cross color matching
+- `8`: fix corners color matching
 - `Shift + move`: inverse turn
-- `2` then a move: half turn
 - Arrow keys: orbit the view
 - `+` / `-`: zoom
 - `Space`: scramble

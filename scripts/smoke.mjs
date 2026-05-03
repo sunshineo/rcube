@@ -63,22 +63,37 @@ try {
     await page.keyboard.press('Digit0')
     await waitForIdle(page)
     await pressMove(page, code)
-    await assertSnapshot(page, (snapshot) => snapshot.isSolved, `${code} should preserve solved puzzle state`)
+    await assertSnapshot(
+      page,
+      (snapshot) => snapshot.isSolved && snapshot.moveCount === 0,
+      `${code} should preserve solved puzzle state without counting as a move`,
+    )
     await page.keyboard.press(`Shift+${code}`)
     await waitForIdle(page)
-    await assertSnapshot(page, (snapshot) => snapshot.isSolved, `${code} inverse should preserve solved state`)
+    await assertSnapshot(
+      page,
+      (snapshot) => snapshot.isSolved && snapshot.moveCount === 0,
+      `${code} inverse should preserve solved state without counting as a move`,
+    )
   }
 
-  await page.keyboard.press('Digit2')
-  await pressMove(page, 'KeyU')
-  await assertSnapshot(page, (snapshot) => !snapshot.isSolved, 'U2 should scramble the cube')
-  await page.keyboard.press('Digit2')
-  await pressMove(page, 'KeyU')
-  await assertSnapshot(page, (snapshot) => snapshot.isSolved, 'two U2 turns should solve')
-
   await page.keyboard.press('Space')
+  await assertSnapshot(
+    page,
+    (snapshot) => snapshot.moveCount === 0 && snapshot.pendingMoves.length === 0,
+    'scramble should start with hidden moves and a zero move count',
+  )
+  await assertText(page, '#move-strip', 'Ready', 'scramble should not show move notation in the move strip')
   await waitForIdle(page)
-  await assertSnapshot(page, (snapshot) => !snapshot.isSolved && snapshot.moveCount === 25, 'scramble should queue 25 turns')
+  await assertSnapshot(
+    page,
+    (snapshot) =>
+      !snapshot.isSolved &&
+      snapshot.moveCount === 0 &&
+      snapshot.lastMoves.length === 0 &&
+      snapshot.pendingMoves.length === 0,
+    'scramble should leave the cube mixed with no counted or visible scramble moves',
+  )
 
   await page.keyboard.press('Digit0')
   await waitForIdle(page)
@@ -94,36 +109,92 @@ try {
   await waitForIdle(page)
   await assertSnapshot(page, (snapshot) => snapshot.isSolved, 'notation sequence plus inverse should solve')
 
-  await page.keyboard.press('Digit0')
-  await waitForIdle(page)
-  await page.keyboard.press('KeyA')
-  await waitForIdle(page)
-  await assertSnapshot(
-    page,
-    (snapshot) => !snapshot.isSolved && snapshot.moveCount === 4 && snapshot.lastMoves.join(' ') === "F' U F U'",
-    'A should run F prime U F U prime',
-  )
+  const shortcutAssertions = [
+    { code: 'Digit1', expected: "F U R U'", count: 4, message: '1 should run the former 3 shortcut' },
+    { code: 'Digit2', expected: "R U' R' U", count: 4, message: '2 should run the former semicolon shortcut' },
+    { code: 'Digit3', expected: "F' U F U'", count: 4, message: '3 should run the former A shortcut' },
+    {
+      code: 'Digit4',
+      expected: "U' R U' R' U F' U F U'",
+      count: 9,
+      message: '4 should run the former 4 shortcut',
+    },
+    {
+      code: 'Digit5',
+      expected: "U F' U F U' R U' R' U",
+      count: 9,
+      message: '5 should run the former 5 shortcut',
+    },
+    { code: 'Digit6', expected: "F R U' R' U F'", count: 6, message: '6 should run the former 8 shortcut' },
+    {
+      code: 'Digit7',
+      expected: "R U' R' U' R U U R'",
+      count: 8,
+      message: '7 should run the former 6 shortcut',
+    },
+    {
+      code: 'Digit8',
+      expected: "U' R U L' U' R' U L",
+      count: 8,
+      message: '8 should run the former 7 shortcut',
+    },
+  ]
+
+  for (const shortcut of shortcutAssertions) {
+    await page.keyboard.press('Digit0')
+    await waitForIdle(page)
+    await page.keyboard.press(shortcut.code)
+    await waitForIdle(page)
+    await assertSnapshot(
+      page,
+      (snapshot) =>
+        !snapshot.isSolved &&
+        snapshot.moveCount === shortcut.count &&
+        snapshot.lastMoves.join(' ') === shortcut.expected,
+      shortcut.message,
+    )
+  }
 
   await page.keyboard.press('Digit0')
   await waitForIdle(page)
-  await page.keyboard.press('Semicolon')
-  await waitForIdle(page)
+  for (const oldShortcut of ['KeyA', 'Semicolon', 'KeyG', 'KeyT']) {
+    await page.keyboard.press(oldShortcut)
+  }
   await assertSnapshot(
     page,
-    (snapshot) => !snapshot.isSolved && snapshot.moveCount === 4 && snapshot.lastMoves.join(' ') === "R U' R' U",
-    'semicolon should run R U prime R prime U',
+    (snapshot) => snapshot.isSolved && snapshot.moveCount === 0,
+    'old letter and punctuation shortcuts should no longer run algorithms',
   )
 
-  await page.keyboard.press('Digit0')
-  await waitForIdle(page)
-  await page.keyboard.press('KeyT')
-  await waitForIdle(page)
-  await assertSnapshot(
+  await page.keyboard.press('KeyH')
+  await page.waitForFunction(() => document.querySelector('#help-dialog')?.open)
+  await assertText(page, '.combo-grid span:nth-child(2)', 'Flip colors of an edge piece in place', 'combo 1 should be described')
+  await assertText(page, '.combo-grid span:nth-child(4)', 'Right hand 4 moves combo', 'combo 2 should be described')
+  await assertText(page, '.combo-grid span:nth-child(6)', 'Left hand 4 moves combo', 'combo 3 should be described')
+  await assertText(page, '.combo-grid span:nth-child(8)', 'Move an edge piece to the right', 'combo 4 should be described')
+  await assertText(page, '.combo-grid span:nth-child(10)', 'Move an edge piece to the left', 'combo 5 should be described')
+  await assertText(page, '.combo-grid span:nth-child(12)', 'Create cross', 'combo 6 should be described')
+  await assertText(page, '.combo-grid span:nth-child(14)', 'Fix cross color matching', 'combo 7 should be described')
+  await assertText(page, '.combo-grid span:nth-child(16)', 'Fix corners color matching', 'combo 8 should be described')
+  await assertText(page, '#individual-heading', 'Individual keys', 'individual keys heading should be visible')
+  await assertText(page, '#combo-heading', 'Combo keys', 'combo heading should be visible')
+  await assertText(
     page,
-    (snapshot) =>
-      !snapshot.isSolved && snapshot.moveCount === 8 && snapshot.lastMoves.join(' ') === "U' R U L' U' R' U L",
-    'T should run U prime R U L prime U prime R prime U L',
+    '.combo-section .keyboard-section-copy p',
+    'Watch https://youtu.be/7Ron6MN45LY for details of these combo keys',
+    'combo source sentence should be visible',
   )
+  await assertText(page, '.combo-source-link', 'https://youtu.be/7Ron6MN45LY', 'combo source link should be visible')
+  await assertAttribute(
+    page,
+    '.combo-source-link',
+    'href',
+    'https://youtu.be/7Ron6MN45LY',
+    'combo source link should target the tutorial',
+  )
+  await page.screenshot({ path: 'artifacts/help-dialog.png', fullPage: true })
+  await page.keyboard.press('Escape')
+  await page.waitForFunction(() => !document.querySelector('#help-dialog')?.open)
 
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.press('ArrowUp')
@@ -190,5 +261,21 @@ async function assertSnapshot(page, predicate, message) {
 
   if (!predicate(snapshot)) {
     throw new Error(`${message}: ${JSON.stringify(snapshot)}`)
+  }
+}
+
+async function assertText(page, selector, expected, message) {
+  const text = await page.textContent(selector)
+
+  if (text !== expected) {
+    throw new Error(`${message}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(text)}`)
+  }
+}
+
+async function assertAttribute(page, selector, attribute, expected, message) {
+  const value = await page.getAttribute(selector, attribute)
+
+  if (value !== expected) {
+    throw new Error(`${message}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(value)}`)
   }
 }

@@ -228,17 +228,15 @@ button {
   white-space: nowrap;
 }
 
-.move-strip[data-mode="armed"] {
-  color: #ffe28a;
-}
-
 .help-dialog {
-  width: min(440px, calc(100vw - 32px));
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 8px;
   background: rgba(26, 24, 21, 0.96);
   color: #f7f1e7;
+  overflow: hidden;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
   backdrop-filter: blur(22px);
 }
@@ -248,8 +246,10 @@ button {
 }
 
 .help-dialog form {
+  max-height: calc(100vh - 32px);
   margin: 0;
   padding: 18px;
+  overflow: auto;
 }
 
 .dialog-title-row {
@@ -268,16 +268,59 @@ button {
   letter-spacing: 0;
 }
 
-.key-grid {
+.keyboard-columns {
   display: grid;
-  grid-template-columns: minmax(110px, 0.78fr) 1fr;
-  gap: 8px 14px;
+  grid-template-columns: minmax(250px, 0.88fr) minmax(300px, 1.12fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.key-grid,
+.combo-grid {
+  display: grid;
+  grid-template-columns: minmax(112px, 0.72fr) minmax(0, 1fr);
+  gap: 8px 12px;
   align-items: center;
   color: rgba(247, 241, 231, 0.72);
   font-size: 14px;
 }
 
-.key-grid span:nth-child(odd) {
+.combo-grid {
+  grid-template-columns: 48px minmax(0, 1fr);
+}
+
+.key-section,
+.combo-section {
+  display: grid;
+  gap: 18px;
+  grid-template-rows: minmax(42px, auto) auto;
+  min-width: 0;
+}
+
+.keyboard-section-copy {
+  display: grid;
+  gap: 5px;
+  align-content: start;
+  min-height: 42px;
+}
+
+.keyboard-section-copy h2 {
+  margin: 0;
+  color: #f7f1e7;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.keyboard-section-copy p {
+  margin: 0;
+  color: rgba(247, 241, 231, 0.68);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.key-grid span:nth-child(odd),
+.combo-grid span:nth-child(odd) {
   display: inline-flex;
   min-height: 30px;
   align-items: center;
@@ -289,6 +332,21 @@ button {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.combo-grid span:nth-child(even) {
+  line-height: 1.3;
+}
+
+.combo-source-link {
+  color: #f7f1e7;
+  opacity: 0.78;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.combo-source-link:hover {
+  opacity: 1;
 }
 
 @media (max-width: 680px) {
@@ -337,5 +395,28 @@ button {
 
   .move-strip {
     font-size: 14px;
+  }
+
+  .help-dialog {
+    width: calc(100vw - 24px);
+  }
+
+  .help-dialog form {
+    padding: 16px;
+  }
+
+  .keyboard-columns {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .key-grid,
+  .combo-grid {
+    grid-template-columns: minmax(96px, 0.5fr) minmax(0, 1fr);
+    font-size: 13px;
+  }
+
+  .combo-source-link {
+    overflow-wrap: anywhere;
   }
 }

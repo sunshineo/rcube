@@ -43,9 +43,22 @@ const MOVE_CODE_MAP: Record<string, string> = {
 }
 
 const ALGORITHM_CODE_MAP: Record<string, string> = {
-  KeyA: "F' U F U'",
-  KeyT: "U' R U L' U' R' U L",
-  Semicolon: "R U' R' U",
+  Digit1: "F U R U'",
+  Digit2: "R U' R' U",
+  Digit3: "F' U F U'",
+  Digit4: "U' R U' R' U F' U F U'",
+  Digit5: "U F' U F U' R U' R' U",
+  Digit6: "F R U' R' U F'",
+  Digit7: "R U' R' U' R U U R'",
+  Digit8: "U' R U L' U' R' U L",
+  Numpad1: "F U R U'",
+  Numpad2: "R U' R' U",
+  Numpad3: "F' U F U'",
+  Numpad4: "U' R U' R' U F' U F U'",
+  Numpad5: "U F' U F U' R U' R' U",
+  Numpad6: "F R U' R' U F'",
+  Numpad7: "R U' R' U' R U U R'",
+  Numpad8: "U' R U L' U' R' U L",
 }
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
@@ -91,20 +104,39 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
             <span data-icon="x"></span>
           </button>
         </div>
-        <div class="key-grid">
-          <span>R L U D F B</span><span>Face turns</span>
-          <span>M E S</span><span>Slice turns</span>
-          <span>X Y Z</span><span>Whole cube turns</span>
-          <span>A</span><span>F' U F U'</span>
-          <span>;</span><span>R U' R' U</span>
-          <span>T</span><span>U' R U L' U' R' U L</span>
-          <span>Shift + move</span><span>Inverse turn</span>
-          <span>2 then move</span><span>Half turn</span>
-          <span>Arrow keys</span><span>Orbit view</span>
-          <span>+ / -</span><span>Zoom</span>
-          <span>Space</span><span>Scramble</span>
-          <span>Backspace</span><span>Undo</span>
-          <span>0</span><span>Reset</span>
+        <div class="keyboard-columns">
+          <div class="key-section" aria-labelledby="individual-heading">
+            <div class="keyboard-section-copy">
+              <h2 id="individual-heading">Individual keys</h2>
+            </div>
+            <div class="key-grid" aria-label="Controls">
+              <span>R L U D F B</span><span>Face turns</span>
+              <span>M E S</span><span>Slice turns</span>
+              <span>X Y Z</span><span>Whole cube turns</span>
+              <span>Shift + move</span><span>Inverse turn</span>
+              <span>Arrow keys</span><span>Orbit view</span>
+              <span>+ / -</span><span>Zoom</span>
+              <span>Space</span><span>Scramble</span>
+              <span>Backspace</span><span>Undo</span>
+              <span>0</span><span>Reset</span>
+            </div>
+          </div>
+          <div class="combo-section" aria-labelledby="combo-heading">
+            <div class="keyboard-section-copy">
+              <h2 id="combo-heading">Combo keys</h2>
+              <p>Watch <a class="combo-source-link" href="https://youtu.be/7Ron6MN45LY" target="_blank" rel="noreferrer">https://youtu.be/7Ron6MN45LY</a> for details of these combo keys</p>
+            </div>
+            <div class="combo-grid" aria-label="Beginner combo keys">
+              <span>1</span><span>Flip colors of an edge piece in place</span>
+              <span>2</span><span>Right hand 4 moves combo</span>
+              <span>3</span><span>Left hand 4 moves combo</span>
+              <span>4</span><span>Move an edge piece to the right</span>
+              <span>5</span><span>Move an edge piece to the left</span>
+              <span>6</span><span>Create cross</span>
+              <span>7</span><span>Fix cross color matching</span>
+              <span>8</span><span>Fix corners color matching</span>
+            </div>
+          </div>
         </div>
       </form>
     </dialog>
@@ -148,7 +180,6 @@ const cameraState = {
 }
 
 const keysDown = new Set<string>()
-let doubleTurnArmed = false
 let dragging = false
 let hasResized = false
 let userAdjustedZoom = false
@@ -201,7 +232,6 @@ cube.onChange(renderHud)
 document.querySelector<HTMLButtonElement>('#scramble-button')!.addEventListener('click', () => cube.scramble())
 document.querySelector<HTMLButtonElement>('#undo-button')!.addEventListener('click', () => cube.undo())
 document.querySelector<HTMLButtonElement>('#reset-button')!.addEventListener('click', () => {
-  doubleTurnArmed = false
   cube.reset()
 })
 document.querySelector<HTMLButtonElement>('#help-button')!.addEventListener('click', () => {
@@ -249,10 +279,7 @@ canvas.addEventListener(
 
 window.rcube = {
   enqueue: (notation: string) => cube.enqueueNotation(notation),
-  reset: () => {
-    doubleTurnArmed = false
-    cube.reset()
-  },
+  reset: () => cube.reset(),
   sampleCanvasPixels,
   scramble: () => cube.scramble(),
   snapshot: () => cube.snapshot(),
@@ -287,30 +314,20 @@ function handleKeyDown(event: KeyboardEvent): void {
     return
   }
 
-  if (event.code === 'Digit2' || event.code === 'Numpad2') {
-    event.preventDefault()
-    doubleTurnArmed = true
-    renderHud()
-    return
-  }
-
   if (event.code === 'Space') {
     event.preventDefault()
-    doubleTurnArmed = false
     cube.scramble()
     return
   }
 
   if (event.code === 'Backspace') {
     event.preventDefault()
-    doubleTurnArmed = false
     cube.undo()
     return
   }
 
   if (event.code === 'Digit0' || event.code === 'Numpad0') {
     event.preventDefault()
-    doubleTurnArmed = false
     cube.reset()
     return
   }
@@ -329,7 +346,6 @@ function handleKeyDown(event: KeyboardEvent): void {
 
   if (algorithm && !event.shiftKey && !event.metaKey && !event.altKey && !event.ctrlKey) {
     event.preventDefault()
-    doubleTurnArmed = false
     cube.enqueueNotation(algorithm)
     return
   }
@@ -343,12 +359,9 @@ function handleKeyDown(event: KeyboardEvent): void {
   event.preventDefault()
 
   const move = buildMove(base, {
-    double: doubleTurnArmed,
     inverse: event.shiftKey,
     recordHistory: true,
   })
-
-  doubleTurnArmed = false
 
   if (move) {
     enqueueMove(move)
@@ -427,8 +440,8 @@ function resize(): void {
 
 function renderHud(): void {
   const snapshot = cube.snapshot()
-  const status = snapshot.activeMove
-    ? `Turning ${snapshot.activeMove}`
+  const status = snapshot.visibleActiveMove
+    ? `Turning ${snapshot.visibleActiveMove}`
     : snapshot.queueLength > 0
       ? `${snapshot.queueLength} queued`
       : snapshot.isSolved
@@ -438,12 +451,6 @@ function renderHud(): void {
   statePill.textContent = status
   statePill.dataset.state = snapshot.isSolved ? 'solved' : 'mixed'
   moveCount.textContent = `${snapshot.moveCount} ${snapshot.moveCount === 1 ? 'turn' : 'turns'}`
-
-  if (doubleTurnArmed) {
-    moveStrip.textContent = '2x armed'
-    moveStrip.dataset.mode = 'armed'
-    return
-  }
 
   moveStrip.dataset.mode = 'normal'
   moveStrip.textContent =

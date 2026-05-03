@@ -21,11 +21,13 @@ type MoveDefinition = {
 export type MoveCommand = {
   axis: Axis
   base: MoveBase
+  countsAsMove: boolean
   layer: Layer
   notation: string
   recordHistory: boolean
   turns: number
   userTurns: TurnAmount
+  visibleInMoveList: boolean
 }
 
 export type CubeSnapshot = {
@@ -35,6 +37,7 @@ export type CubeSnapshot = {
   moveCount: number
   pendingMoves: string[]
   queueLength: number
+  visibleActiveMove: string | null
 }
 
 type StickerInfo = {
@@ -87,11 +90,18 @@ const FACE_SPECS = [
 ]
 
 const SCRAMBLE_BASES: MoveBase[] = ['R', 'L', 'U', 'D', 'F', 'B']
+const WHOLE_CUBE_BASES = new Set<MoveBase>(['X', 'Y', 'Z'])
 const TEMP_VECTOR = new THREE.Vector3()
 
 export function buildMove(
   baseInput: string,
-  options: { double?: boolean; inverse?: boolean; recordHistory?: boolean; userTurns?: TurnAmount } = {},
+  options: {
+    countsAsMove?: boolean
+    inverse?: boolean
+    recordHistory?: boolean
+    userTurns?: TurnAmount
+    visibleInMoveList?: boolean
+  } = {},
 ): MoveCommand | null {
   const base = baseInput.toUpperCase() as MoveBase
   const definition = MOVE_DEFINITIONS[base]
@@ -100,17 +110,19 @@ export function buildMove(
     return null
   }
 
-  const userTurns = options.userTurns ?? (options.double ? 2 : options.inverse ? -1 : 1)
+  const userTurns = options.userTurns ?? (options.inverse ? -1 : 1)
   const turns = definition.turns * userTurns
 
   return {
     axis: definition.axis,
     base,
+    countsAsMove: options.countsAsMove ?? !WHOLE_CUBE_BASES.has(base),
     layer: definition.layer,
     notation: notationFor(base, userTurns),
     recordHistory: options.recordHistory ?? true,
     turns,
     userTurns,
+    visibleInMoveList: options.visibleInMoveList ?? true,
   }
 }
 
@@ -138,7 +150,12 @@ export function moveFromNotation(token: string, recordHistory = true): MoveComma
 
 export function inverseMove(command: MoveCommand, recordHistory = false): MoveCommand {
   const userTurns: TurnAmount = command.userTurns === 2 ? 2 : command.userTurns === 1 ? -1 : 1
-  const inverted = buildMove(command.base, { recordHistory, userTurns })
+  const inverted = buildMove(command.base, {
+    countsAsMove: command.countsAsMove,
+    recordHistory,
+    userTurns,
+    visibleInMoveList: command.visibleInMoveList,
+  })
 
   if (!inverted) {
     throw new Error(`Unable to invert move ${command.notation}`)
@@ -192,7 +209,12 @@ export class RubiksCube {
       const base = available[Math.floor(Math.random() * available.length)]
       const amountRoll = Math.random()
       const userTurns: TurnAmount = amountRoll < 0.36 ? 1 : amountRoll < 0.72 ? -1 : 2
-      const move = buildMove(base, { recordHistory: true, userTurns })
+      const move = buildMove(base, {
+        countsAsMove: false,
+        recordHistory: false,
+        userTurns,
+        visibleInMoveList: false,
+      })
 
       if (move) {
         moves.push(move)
@@ -267,18 +289,23 @@ export class RubiksCube {
 
   snapshot(): CubeSnapshot {
     const activeMove = this.activeTurn?.command.notation ?? null
+    const visibleActiveMove = this.activeTurn?.command.visibleInMoveList ? activeMove : null
     const pendingMoves = [
-      ...(activeMove ? [activeMove] : []),
-      ...this.queue.slice(0, 8).map((move) => move.notation),
+      ...(visibleActiveMove ? [visibleActiveMove] : []),
+      ...this.queue
+        .filter((move) => move.visibleInMoveList)
+        .slice(0, 8)
+        .map((move) => move.notation),
     ]
 
     return {
       activeMove,
       isSolved: this.isSolved(),
       lastMoves: this.history.slice(-14).map((move) => move.notation),
-      moveCount: this.history.length,
+      moveCount: this.history.filter((move) => move.countsAsMove).length,
       pendingMoves,
       queueLength: this.queue.length,
+      visibleActiveMove,
     }
   }
 

@@ -29,11 +29,15 @@ This project is a Vite + TypeScript + Three.js web app that renders a polished, 
   - `E`: equator slice between `U` and `D`, direction follows `D`.
   - `S`: standing slice between `F` and `B`, direction follows `F`.
 - `X Y Z`: whole-cube rotations.
-- `A`: runs `F' U F U'`.
-- `;`: runs `R U' R' U`.
-- `T`: runs `U' R U L' U' R' U L`.
+- `1`: flips colors of an edge piece in place.
+- `2`: right hand 4 moves combo.
+- `3`: left hand 4 moves combo.
+- `4`: moves an edge piece to the right.
+- `5`: moves an edge piece to the left.
+- `6`: creates cross.
+- `7`: fixes cross color matching.
+- `8`: fixes corners color matching.
 - `Shift + move`: inverse turn.
-- `2` then a move: half turn.
 - Arrow keys: orbit view.
 - `+` / `-`: zoom.
 - `Space`: scramble.
@@ -63,7 +67,6 @@ npm run dev -- --host 127.0.0.1 --port 5173
 - Face moves and their inverses.
 - Slice moves and their inverses.
 - Whole-cube rotations.
-- Half turns.
 - Scramble behavior.
 - Undo behavior.
 - Reset behavior.
